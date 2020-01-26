@@ -4,7 +4,7 @@
 :date: '2020.01.26'
 
 ### Description 
-List the infected provinces and its governed cities and add watermark.
+[link:README_CN.adoc[中文]] List the infected provinces and its governed cities and add watermark.
 
 ### Compatable OS
 - Linux
@@ -24,3 +24,6 @@ python NCoronReport.py
 - Addmark 
 
 The above three are system scripts written by myself, https://github.com/QMHTMY/Text2docx2pdf[Here] to download.
+
+### Result 
+image::infected.png[infected district]
