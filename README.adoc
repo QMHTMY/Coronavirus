@@ -3,6 +3,9 @@
 :author: 'Shieber'
 :date: '2020.01.26'
 
+### Description 
+List the infected provinces and its governed cities and add watermark.
+
 ### Compatable OS
 - Linux
 
@@ -16,4 +19,8 @@ python NCoronReport.py
 - webdriver
 - Selenium and related webdriver
 - libreoffice or pandoc
-- Text2docx,Docx2pdf,Addmark (System scripts written by   me，https://github.com/QMHTMY/Text2docx2pdf[here] to download)
+- Text2docx
+- Docx2pdf
+- Addmark 
+
+The above three are system scripts written by myself, https://github.com/QMHTMY/Text2docx2pdf[Here] to download.

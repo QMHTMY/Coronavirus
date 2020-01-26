@@ -3,6 +3,9 @@
 :author: 'Shieber'
 :date: '2020.01.26'
 
+### 描述
+将感染地区分省市列出，并添加水印。
+
 ### 兼容系统
 - Linux
 
@@ -15,4 +18,4 @@ python NCoronReport.py
 - python3
 - Selenium 及对应webdriver
 - libreoffice 或 pandoc
-- Text2docx,Docx2pdf,Addmark (为我写的系统程序，https://gitee.com/QMHTMY/Text2docx2pdf[此处]可查看下载)
+- Text2docx,Docx2pdf,Addmark (我写的系统程序， https://gitee.com/QMHTMY/Text2docx2pdf[此处]可下载)
