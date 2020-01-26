@@ -1,4 +1,4 @@
-# 2019 新型冠状病毒统计脚本
+# 2019 新型冠状病毒感染地区报告
 :experimental:
 :author: 'Shieber'
 :date: '2020.01.26'

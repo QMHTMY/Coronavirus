@@ -1,4 +1,4 @@
-# 2019 Novel Coronavirus Report Script 
+# 2019 Novel Coronavirus Infected Districts Report
 :experimental:
 :author: 'Shieber'
 :date: '2020.01.26'
