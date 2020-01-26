@@ -1,0 +1,19 @@
+# 2019 Novel Coronavirus Report Script 
+:experimental:
+:author: 'Shieber'
+:date: '2020.01.26'
+
+### Compatable OS
+- Linux
+
+### Usage
+python NCoronReport.py
+
+### Dependencies 
+- bs4
+- docx
+- python3
+- webdriver
+- Selenium and related webdriver
+- libreoffice or pandoc
+- Text2docx,Docx2pdf,Addmark (System scripts written by   me，https://github.com/QMHTMY/Text2docx2pdf[here] to download)

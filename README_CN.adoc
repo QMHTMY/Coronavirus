@@ -1,0 +1,18 @@
+# 2019 新型冠状病毒统计脚本
+:experimental:
+:author: 'Shieber'
+:date: '2020.01.26'
+
+### 兼容系统
+- Linux
+
+### 使用
+python NCoronReport.py
+
+### 依赖
+- bs4
+- docx
+- python3
+- Selenium 及对应webdriver
+- libreoffice 或 pandoc
+- Text2docx,Docx2pdf,Addmark (为我写的系统程序，https://gitee.com/QMHTMY/Text2docx2pdf[此处]可查看下载)
