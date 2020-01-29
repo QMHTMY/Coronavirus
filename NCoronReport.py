@@ -1,13 +1,15 @@
-#!/usr/bin/python
-import re,sys
+#!/usr/bin/python3
+import re
+import sys
 import time
 import datetime
+import requests
 from bs4 import BeautifulSoup as Soup
 from selenium import webdriver
-from selenium.webdriver.firefox.options import Options
 from subprocess import call
+from selenium.webdriver.firefox.options import Options
 
-class NovelCovReport():
+class NovelCronvReport():
     "2019nCov-武汉新型冠状病毒疫情报告信息采集类"
     def __init__(self, province=''):
         self.headers  = { 'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) \
@@ -15,10 +17,10 @@ class NovelCovReport():
                           'Connection':'close'
                         }                                          #header可自行调整
         self.name  = '2019_nConv'                                  #PDF文件名
-        self.title = '2019新型冠状病毒疫情数据报告'                #PDF文件抬头
+        self.title = '2019-nCoV武汉新型冠状病毒疫情数据报告'       #PDF文件抬头
         self.url   = 'https://news.qq.com//zt2020/page/feiyan.htm' #Tecent报道url
 
-    def Time(self):
+    def GetTime(self):
         "报告时间"
         now = datetime.datetime.now()
         y, M, d = str(now.year), str(now.month),  str(now.day)
@@ -38,152 +40,138 @@ class NovelCovReport():
 
         return '%s.%s.%s %s:%s:%s'%(y,M,d,h,m,s)
 
-    def getFromURL(self):
+    def GetFromURL(self):
         "网页下载"
-        Ffopts = Options()
-        Ffopts.add_argument('--headless') #无头浏览器
-        driver = webdriver.Firefox(firefox_options=Ffopts)
+        fOpts = Options()
+        fOpts.add_argument('--headless')
+        driver = webdriver.Firefox(firefox_options=fOpts)
         driver.implicitly_wait(10)
         try: 
             driver.get(self.url)
-            #time.sleep(5)
-            html_cont = driver.page_source
-            soup = Soup(html_cont,'html.parser') 
+            htmlCtnt = driver.page_source
+            soup = Soup(htmlCtnt,'html.parser') 
         except Exception as err:
             print(err)
         finally:
             driver.close() 
-            return soup
+            if soup:
+                return soup
+            else:
+                print("NontType ")
+                sys.exit(1)
 
-    def extractData(self, soup):
+    def ExtractData(self, soup):
         "从html中提取信息并保存"
-        if not soup:
-            print("NontType ")
-            sys.exit(1)
-
         #1.全国总数据
         countyData = [] 
-        divcountry = soup.find('div', attrs={'class':'recentNumber'})
-        divnumbers = divcountry.find_all('div',attrs={'class':'number'})
-        for div in divnumbers:
-            countyData.append(div.getText().strip())
-        #['2034','2684','49','56']
+        divCountry = soup.find('div', attrs={'class':'recentNumber'})
+        divNumbers = divCountry.find_all('div',attrs={'class':'number'})
+        for divNumber in divNumbers:
+            countyData.append(divNumber.getText().strip())
 
-        #2.其他省市自治区特别行政区(含港澳台)数据
+        #2.各省市自治区特别行政区(含港澳台)数据
         provsData = [] 
-        divplaces = soup.find('div',attrs={'class':'places'})
+        divPlaces = soup.find('div',attrs={'class':'places'})
 
-        #2.1特殊地区
-        divhubei = divplaces.find('div',attrs={'class':'place current'})        #湖北数据
-        divhgat  = divplaces.find_all('div',attrs={'class':'place no-sharp '})  #沪港澳台数据
+        divHubei  = divPlaces.find('div',attrs={'class':'placeItemWrap current'}) #湖北
+        divProvs  = divPlaces.find_all('div',attrs={'class':'placeItemWrap '})
+        divProvs.insert(0,divHubei)
 
-        #2.2其他各省区市
-        divprovs = divplaces.find_all('div',attrs={'class':'place '})
-
-        for div in divhgat:
-            divprovs.insert(0,div) #沪港澳台数据加入
-        divprovs.insert(0,divhubei) 
-
-        for divprov in divprovs:
-            #2.2.1一省区市总数据
+        for divProv in divProvs:
             provData  = {} 
-            Pdata = self.getProvData(divprov)
-            provData[Pdata[0]] = [Pdata[1],'x', Pdata[2],Pdata[3]]
+
+            #2.2.1一省区市总数据
+            prov = divProv.find('div',attrs={"class":re.compile(r'clearfix placeItem placeArea.*?')}) 
+            data = self.GetInfo(prov)
+            provData[data[0]] = [data[2],data[1], data[3],data[4]]
 
             #2.2.2各省区市受感染城市数据
-            infoItems = divprov.find_all('div',attrs={'class':'infoItem'})
+            infoItems = divProv.find_all('div',attrs={"class":"clearfix placeItem placeCity"})
             if infoItems:
                 for infoItem in infoItems:
-                    Cdata = self.getCityData(infoItem)
-                    provData[Cdata[0]] = [Cdata[1],'x', Cdata[2],Cdata[3]]
+                    data = self.GetInfo(infoItem)
+                    provData[data[0]] = [data[2],data[1],data[3],data[4]]
             provsData.append(provData)
 
         #3.国外数据
-        foreignsData = {}
-        divforeign  = divplaces.find_all('div',attrs={'class':'place no-sharp'})
-        for country in divforeign:
-            Fdata = self.getForeignData(country)
-            foreignsData[Fdata[0]] = [Fdata[1],'x', Fdata[2],Fdata[3]]
+        frnsData = {}
+        divFrns  = divPlaces.find_all('div',attrs={'class':'clearfix placeItem placeArea no-sharp abroad'})
+        for divFrn in divFrns:
+            data = self.GetInfo(divFrn)
+            frnsData[data[0]] = [data[1],'x',data[2],data[3]]
 
-        #4.数据返回
-        return countyData, provsData,foreignsData
+        return countyData, provsData, frnsData
 
-    def getForeignData(self,country):
-        "提取它国数据"
-        info = country.find('div',attrs={'class':'info'}) 
-        return self.getinfo(info) #['泰国','6','2','0']
+    def GetInfo(self, info):
+        data = []
+        #地区名
+        h2 = info.find('h2')
+        data.append(h2.getText().strip())
+        #新增，确诊，治愈，死亡人数
+        divs = info.find_all('div')
+        for div in divs:
+            data.append(div.getText().strip())
 
-    def getProvData(self,divprov):
-        "提取一省数据"
-        info = divprov.find('div',attrs={'class':'info'}) 
-        return self.getinfo(info) #['湖北','1052','42','52']
-
-    def getCityData(self,infoItem):
-        "提取一市数据"
-        return self.getinfo(infoItem) #['武汉','618','42','52']
-
-    def getinfo(self,item):
-        datatext = item.getText().strip()
-        datatext = datatext.replace('\n','').replace(' ','')
-        dataPtn  = re.compile(r'(.*)确诊(.*)例，治愈(.*)例，死亡(.*)例') 
-        match    = dataPtn.search(datatext)
-        data     = [match.group(1),match.group(2),match.group(3),match.group(4)]
         return data
 
-    def write2text(self, CD,PD,FD):
-        "CD:全国,PD:各省,FD:国外"
+    def write2text(self, cD,pD,fD):
+        "cD:全国数据,pD:各省数据,fD:国外数据"
         with open(self.name + '.txt','w') as fobj:
-            #初始化标题等信息
+            #初始化标题等标准信息
             fobj.write(self.title +'\n')
-            fobj.write(' '*10 + self.Time()  +'\n\n')
-            fobj.write('区域\t\t确诊\t疑似\t治愈\t死亡\n')
+            fobj.write('报告制作：Shieber\n')
+            fobj.write('更新频率：每三小时自动更新\n')
+            fobj.write('数据来源：腾讯疫情报告中心\n')
+            fobj.write('生成时间：' + self.GetTime()  +'\n')
+            fobj.write('数据地址：' + self.url + '\n')
+            fobj.write('源码(国内)：https://gitee.com/QMHTMY/Coronavirus (码云)\n')
+            fobj.write('源码(国外)：https://github.com/QMHTMY/Coronavirus (github)\n')
+            fobj.write('PDF报告获取：以"疫情"为主题发送邮件到Shieber@aliyun.com获取PDF文件\n\n')
 
             #中国数据写入
-            fobj.write('中国' + '\t\t' + '\t'.join([CD[0],CD[1],CD[2],CD[3],'\n']))
+            fobj.write('区域\t\t确诊\t疑似\t治愈\t死亡\n')
+            fobj.write('中国' + '\t\t' + '\t'.join([cD[0],cD[1],cD[2],cD[3],'\n']))
 
             #外国数据写入
-            for k, v in FD.items():
-                if len(k) < 4: 
+            for k, v in fD.items():
+                if len(k) < 4:
                     fobj.write(k + '\t\t' + '\t'.join([v[0],v[1],v[2],v[3],'\n']))
-                else:          #国名太长就少打印一个\t，为了对齐
+                else:
                     fobj.write(k + '\t' + '\t'.join([v[0],v[1],v[2],v[3],'\n']))
-            fobj.write('\n')
+            fobj.write('\n\n')
 
             #各省数据写入
-            for dic in PD:
+            now = datetime.datetime.now()
+            fobj.write('区域\t\t确诊\t治愈\t死亡\t%s日新增\n'%str(now.day-1))
+            for dic in pD:
                 for k, v in dic.items():
                     if len(k) < 4:
-                        fobj.write(k + '\t\t' + '\t'.join([v[0],v[1],v[2],v[3],'\n']))
-                    else:      #市名太长就少打印一个\t
-                        fobj.write(k + '\t' + '\t'.join([v[0],v[1],v[2],v[3],'\n']))
+                        fobj.write(k + '\t\t' + '\t'.join([v[0],v[2],v[3],v[1],'\n']))
+                    else:
+                        fobj.write(k + '\t' + '\t'.join([v[0],v[2],v[3],v[1],'\n']))
                 fobj.write('\n')
         
     def trans2pdf(self):
-        #转换为pdf
-        txtname  = self.name + '.txt'
-        docxname = self.name + '.docx'
-        pdfname  = self.name + '.pdf'
+        #转换为pdf并发送到邮箱
+        txtName  = self.name + '.txt'
+        docxName = self.name + '.docx'
+        pdfName  = self.name + '.pdf'
 
-        #调用自己编写好的系统指令转成Pdf
-        call('Text2docx %s 1>/dev/null 2>&1'%txtname,shell=True)
-        call('Docx2pdf %s 1>/dev/null 2>&1'%docxname,shell=True)
-        call('rm %s 1>/dev/null 2>&1'%docxname,shell=True)
+        #转成Pdf
+        call('Text2docx %s 1>/dev/null 2>&1'%txtName,shell=True)
+        call('Docx2pdf %s 1>/dev/null 2>&1'%docxName,shell=True)
+        call('rm %s 1>/dev/null 2>&1'%docxName,shell=True)
 
-        #调用自己编写好的系统指令添加水印
-        call('Addmark %s temp.pdf watermark.pdf'%pdfname,shell=True)
-        call('mv temp.pdf %s 1>/dev/null 2>&1'%pdfname,shell=True)
+        #添加水印
+        call('Addmark %s temp.pdf watermark.pdf'%pdfName,shell=True)
+        call('mv temp.pdf %s 1>/dev/null 2>&1'%pdfName,shell=True)
+
+        #发送到邮箱
+        #call('Email2phone %s 1>/dev/null 2>&1'%pdfName,shell=True)
 
 if __name__ == '__main__':
-    nCovReport = NovelCovReport()
-    soup = nCovReport.getFromURL()
-    cd,pd,fd = nCovReport.extractData(soup)
-    nCovReport.write2text(cd,pd,fd)
-    nCovReport.trans2pdf()
-
-    #datastructure = [ 大致数据结构
-    #{'湖北':['1052','x','42','52'],'武汉':['618','x','40','45']}
-    #{'香港':['5','x','0','0']}
-    #{'日本':['3','x','1','0']}
-    #{'韩国':['2','x','0','0']}
-    #{'美国':['4','x','0','0']}
-    #]
+    NCR  = NovelCronvReport()
+    soup = NCR.GetFromURL()
+    cd,pd,fd = NCR.ExtractData(soup)
+    NCR.write2text(cd,pd,fd)
+    NCR.trans2pdf()
