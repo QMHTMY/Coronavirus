@@ -1,13 +1,12 @@
 #!/usr/bin/python3
 import re
 import sys
-import time
 import datetime
 import requests
 from bs4 import BeautifulSoup as Soup
 from selenium import webdriver
-from subprocess import call
 from selenium.webdriver.firefox.options import Options
+from subprocess import call
 
 class NovelCronvReport():
     "2019nCov-武汉新型冠状病毒疫情报告信息采集类"
@@ -16,6 +15,7 @@ class NovelCronvReport():
                            AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36',
                           'Connection':'close'
                         }                                          #header可自行调整
+        self.author= 'Shieber'                                     #作者名
         self.name  = '2019_nConv'                                  #PDF文件名
         self.title = '2019-nCoV武汉新型冠状病毒疫情数据报告'       #PDF文件抬头
         self.url   = 'https://news.qq.com//zt2020/page/feiyan.htm' #Tecent报道url
@@ -104,9 +104,11 @@ class NovelCronvReport():
 
     def GetInfo(self, info):
         data = []
+
         #地区名
         h2 = info.find('h2')
         data.append(h2.getText().strip())
+
         #新增，确诊，治愈，死亡人数
         divs = info.find_all('div')
         for div in divs:
@@ -119,20 +121,19 @@ class NovelCronvReport():
         with open(self.name + '.txt','w') as fobj:
             #初始化标题等标准信息
             fobj.write(self.title +'\n')
-            fobj.write('报告制作：Shieber\n')
-            fobj.write('更新频率：每三小时自动更新\n')
+
+            fobj.write('报告制作：%s\n'%self.author)
             fobj.write('数据来源：腾讯疫情报告中心\n')
             fobj.write('生成时间：' + self.GetTime()  +'\n')
             fobj.write('数据地址：' + self.url + '\n')
             fobj.write('源码(国内)：https://gitee.com/QMHTMY/Coronavirus (码云)\n')
             fobj.write('源码(国外)：https://github.com/QMHTMY/Coronavirus (github)\n')
-            fobj.write('PDF报告获取：以"疫情"为主题发送邮件到Shieber@aliyun.com获取PDF文件\n\n')
 
-            #中国数据写入
+            #中国总数据写入
             fobj.write('区域\t\t确诊\t疑似\t治愈\t死亡\n')
             fobj.write('中国' + '\t\t' + '\t'.join([cD[0],cD[1],cD[2],cD[3],'\n']))
 
-            #外国数据写入
+            #外国总数据写入
             for k, v in fD.items():
                 if len(k) < 4:
                     fobj.write(k + '\t\t' + '\t'.join([v[0],v[1],v[2],v[3],'\n']))
@@ -140,9 +141,9 @@ class NovelCronvReport():
                     fobj.write(k + '\t' + '\t'.join([v[0],v[1],v[2],v[3],'\n']))
             fobj.write('\n\n')
 
-            #各省数据写入
             now = datetime.datetime.now()
-            fobj.write('区域\t\t确诊\t治愈\t死亡\t%s日新增\n'%str(now.day-1))
+            fobj.write('区域\t\t确诊\t治愈\t死亡\t%s日新增\n'%str(now.day-1))#头一天日期
+            #中国各省数据写入
             for dic in pD:
                 for k, v in dic.items():
                     if len(k) < 4:
@@ -163,7 +164,7 @@ class NovelCronvReport():
         call('rm %s 1>/dev/null 2>&1'%docxName,shell=True)
 
         #添加水印
-        call('Addmark %s temp.pdf watermark.pdf'%pdfName,shell=True)
+        call('Addmark %s temp.pdf watermark.pdf -1 1'%pdfName,shell=True)
         call('mv temp.pdf %s 1>/dev/null 2>&1'%pdfName,shell=True)
 
         #发送到邮箱
@@ -172,6 +173,6 @@ class NovelCronvReport():
 if __name__ == '__main__':
     NCR  = NovelCronvReport()
     soup = NCR.GetFromURL()
-    cd,pd,fd = NCR.ExtractData(soup)
-    NCR.write2text(cd,pd,fd)
+    cD,pD,fD = NCR.ExtractData(soup)
+    NCR.write2text(cD,pD,fD)
     NCR.trans2pdf()
