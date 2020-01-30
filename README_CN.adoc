@@ -20,5 +20,9 @@ python NCoronReport.py
 - libreoffice 或 pandoc
 - Text2docx,Docx2pdf,Addmark (我写的系统程序， https://gitee.com/QMHTMY/Text2docx2pdf[此处]可下载)
 
+### 日志
+- 2020.01.30 加入新特效：致死率
+- 2020.01.28 统计各种数据
+
 ### 结果展示
 image::infected.png[受感染区域]

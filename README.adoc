@@ -25,5 +25,9 @@ python NCoronReport.py
 
 The above three are system scripts written by myself, https://github.com/QMHTMY/Text2docx2pdf[Here] to download.
 
+### Change Log
+- 2020.01.30 New feature:Mortality
+- 2020.01.28 Statistic all data 
+
 ### Result 
 image::infected.png[infected district]
