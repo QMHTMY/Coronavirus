@@ -1,4 +1,37 @@
 #!/usr/bin/python3
+#-*- coding: utf-8 -*-
+#
+#    Author: Shieber
+#    Date: 2020.01.30
+#
+#                             MIT LICENSE
+#
+#    Copyright (c) 2017 lymslive
+#
+#    Permission is hereby granted, free of charge, to any person obtaining a copy
+#    of this software and associated documentation files (the "Software"), to deal
+#    in the Software without restriction, including without limitation the rights
+#    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#    copies of the Software, and to permit persons to whom the Software is
+#    furnished to do so, subject to the following conditions:
+#
+#    The above copyright notice and this permission notice shall be included in all
+#    copies or substantial portions of the Software.
+#
+#    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+#    SOFTWARE.
+#
+#                            Function Description
+#    2019-nCoV武汉新型冠状病毒病例统计
+#
+#    Copyright 2020 
+#    All Rights Reserved!
+
 import re
 import sys
 import datetime
@@ -121,36 +154,47 @@ class NovelCronvReport():
         with open(self.name + '.txt','w') as fobj:
             #初始化标题等标准信息
             fobj.write(self.title +'\n')
-
             fobj.write('报告制作：%s\n'%self.author)
-            fobj.write('数据来源：腾讯疫情报告中心\n')
+            fobj.write('数据来源：腾讯疫情实时追踪\n')
             fobj.write('生成时间：' + self.GetTime()  +'\n')
             fobj.write('数据地址：' + self.url + '\n')
             fobj.write('源码(国内)：https://gitee.com/QMHTMY/Coronavirus (码云)\n')
             fobj.write('源码(国外)：https://github.com/QMHTMY/Coronavirus (github)\n')
+            fobj.write('\n')
 
             #中国总数据写入
-            fobj.write('区域\t\t确诊\t疑似\t治愈\t死亡\n')
-            fobj.write('中国' + '\t\t' + '\t'.join([cD[0],cD[1],cD[2],cD[3],'\n']))
+            fobj.write('区域\t\t确诊\t疑似\t治愈\t死亡\t致死率\n')
+            drate = self.deathRate(cD)
+            fobj.write('中国'+'\t\t'+'\t'.join([cD[0],cD[1],cD[2],cD[3],drate'\n']))
 
             #外国总数据写入
             for k, v in fD.items():
+                drate = self.deathRate(v)
                 if len(k) < 4:
-                    fobj.write(k + '\t\t' + '\t'.join([v[0],v[1],v[2],v[3],'\n']))
+                    fobj.write(k + '\t\t' + '\t'.join([v[0],v[1],v[2],v[3],drate'\n']))
                 else:
-                    fobj.write(k + '\t' + '\t'.join([v[0],v[1],v[2],v[3],'\n']))
+                    fobj.write(k + '\t' + '\t'.join([v[0],v[1],v[2],v[3],drate'\n']))
             fobj.write('\n\n')
 
-            now = datetime.datetime.now()
-            fobj.write('区域\t\t确诊\t治愈\t死亡\t%s日新增\n'%str(now.day-1))#头一天日期
+            fobj.write('区域\t\t确诊\t治愈\t死亡\t致死率\t昨日确诊\n')#头一天日期
             #中国各省数据写入
             for dic in pD:
                 for k, v in dic.items():
+                    drate = self.deathRate(v)
                     if len(k) < 4:
-                        fobj.write(k + '\t\t' + '\t'.join([v[0],v[2],v[3],v[1],'\n']))
+                        fobj.write(k+'\t\t'+'\t'.join([v[0],v[2],v[3],drate,'+'+v[1],'\n']))
                     else:
-                        fobj.write(k + '\t' + '\t'.join([v[0],v[2],v[3],v[1],'\n']))
+                        fobj.write(k+'\t'+'\t'.join([v[0],v[2],v[3],'+'+v[1],'\n']))
                 fobj.write('\n')
+
+    def deathRate(self,data):
+        #计算致死率
+        if '0' != data[0]:
+            rateStr = '%.1f%%'%(int(data[3])*100/int(data[0]))
+        else:
+            rateStr = 'x.xx%'
+        return rateStr
+
         
     def trans2pdf(self):
         #转换为pdf并发送到邮箱
