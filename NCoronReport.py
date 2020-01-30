@@ -35,7 +35,6 @@
 import re
 import sys
 import datetime
-import requests
 from bs4 import BeautifulSoup as Soup
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
