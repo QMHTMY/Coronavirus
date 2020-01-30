@@ -44,10 +44,6 @@ from subprocess import call
 class NovelCronvReport():
     "2019nCov-武汉新型冠状病毒疫情报告信息采集类"
     def __init__(self, province=''):
-        self.headers  = { 'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) \
-                           AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36',
-                          'Connection':'close'
-                        }                                          #header可自行调整
         self.author= 'Shieber'                                     #作者名
         self.name  = '2019_nConv'                                  #PDF文件名
         self.title = '2019-nCoV武汉新型冠状病毒疫情数据报告'       #PDF文件抬头
