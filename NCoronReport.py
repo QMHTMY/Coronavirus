@@ -96,7 +96,7 @@ class NovelCronvReport():
                 provData['市'][data[0]] = data[1:]
             provsData.append(provData)
 
-        #3.国外数据
+        #3.外国数据
         divFrns  = divPlaces.find_all('div',attrs={'class':'clearfix placeItem placeArea no-sharp abroad'})
         for divFrn in divFrns:
             data = self.GetInfo(divFrn)
@@ -195,7 +195,6 @@ class NovelCronvReport():
             aD = self.statics(cD)     #全球总计
             fD = self.statics(cD[1:]) #国外总计
             zD = cD[0][1]             #中国总计
-
             fobj.write('\nA. 2019-nCoV疫情报告摘要：')
             fobj.write('\n区域\t确诊\t疑似\t治愈\t死亡\t致死率\n')
             fobj.write('中国'+'\t'+'\t'.join([zD[0],zD[1],zD[2],zD[3],self.dRate(zD),'\n']))
@@ -209,7 +208,7 @@ class NovelCronvReport():
                 fobj.write(''.join([dd[0],'：',dd[1],'\n']))
 
             fobj.write('\n各省区市确诊人数：\n')
-            for i in range(17):
+            for i in range(17):      #34个省区市，分成两列
                 p1, p2 = ifNum[i], ifNum[i+17]
                 fobj.write(''.join([p1[0],'：',p1[1],'\t',p2[0],'：',p2[1],'\n']))
 
