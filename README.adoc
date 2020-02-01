@@ -26,8 +26,10 @@ python NCoronReport.py
 The above three are system scripts written by myself, https://github.com/QMHTMY/Text2docx2pdf[Here] to download.
 
 ### Change Log
-- 2020.01.30 New feature:Mortality
-- 2020.01.28 Statistic all data 
+- 2020.02.01 New feature:Statistic cities which infected number over 100.
+- 2020.01.31 New feature:Statistic provinces which infected people died. 
+- 2020.01.30 New feature:Calculate fetality rate.
+- 2020.01.28 Statistic all data. 
 
 ### Result 
 image::infected.png[infected district]
