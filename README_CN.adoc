@@ -10,7 +10,7 @@
 - Linux
 
 ### 使用
-python NCoronReport.py
+    $ python NCoronReport.py
 
 ### 依赖
 - bs4
