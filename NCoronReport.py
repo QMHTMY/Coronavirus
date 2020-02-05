@@ -76,7 +76,7 @@ class NovelCronvReport():
         #2.各省市自治区特别行政区(含港澳台)数据
         divPlaces = soup.find('div',attrs={'class':'places'})
         divHubei  = divPlaces.find('div',attrs={'class':'placeItemWrap current'}) 
-        divProvs  = divPlaces.find_all('div',attrs={'class':'placeItemWrap '})
+        divProvs  = divPlaces.find_all('div',attrs={'class':'placeItemWrap'})
         divProvs.insert(0,divHubei)
 
         provsData = [] 
