@@ -34,10 +34,14 @@
 
 import sys
 import time
+import logging
 from bs4 import BeautifulSoup as Soup
 from selenium import webdriver
 from subprocess import call
 from selenium.webdriver.firefox.options import Options
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s -%(message)s')
+logger = logging.getLogger(__name__)
 
 class NovelCronvReport():
     "2019nCov-武汉新型冠状病毒疫情报告信息采集"
@@ -86,14 +90,14 @@ class NovelCronvReport():
             prov = divProv.find('div',attrs={"class":"clearfix placeItem placeArea"}) 
             data = self.GetInfo(prov)
             data[1],data[2] = data[2],data[1]
-            provData['省'] = data
+            provData['省'] = data[:-1]
 
             #2.2.2各省区市受感染城市数据
             infoItems = divProv.find_all('div',attrs={"class":"clearfix placeItem placeCity"})
             for infoItem in infoItems:
                 data = self.GetInfo(infoItem)
                 data[1],data[2] = data[2],data[1]
-                provData['市'][data[0]] = data[1:]
+                provData['市'][data[0]] = data[1:-1]
             provsData.append(provData)
 
         #3.外国数据
