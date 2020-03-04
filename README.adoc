@@ -4,6 +4,7 @@
 :date: '2020.01.26'
 
 ### Description 
+This script is not usable. +
 [link:README_CN.adoc[中文]] List the infected provinces and its governed cities and add watermark.
 
 ### Compatable OS
